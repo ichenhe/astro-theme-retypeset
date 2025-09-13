@@ -1,4 +1,6 @@
-import { allLocales, base, defaultLocale, moreLocales } from '@/config'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import { allLocales, defaultLocale, moreLocales } from '@/config'
+import { normalizePath } from '@/utils/path'
 
 /**
  * Gets the language code from the current path
@@ -7,12 +9,10 @@ import { allLocales, base, defaultLocale, moreLocales } from '@/config'
  * @returns Language code detected from path or default locale
  */
 export function getLangFromPath(path: string) {
-  const pathWithoutBase = base && path.startsWith(base)
-    ? path.slice(base.length)
-    : path
+  const pathWithBase = normalizePath(path, { includeBase: true })
 
   return moreLocales.find(lang =>
-    pathWithoutBase.startsWith(`/${lang}/`)) ?? defaultLocale
+    pathWithBase.startsWith(getRelativeLocaleUrl(lang, ''))) ?? defaultLocale
 }
 
 /**

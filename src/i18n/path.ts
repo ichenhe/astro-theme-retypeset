@@ -1,5 +1,7 @@
-import { base, defaultLocale, moreLocales } from '@/config'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import { defaultLocale, moreLocales } from '@/config'
 import { getLangFromPath, getNextGlobalLang } from '@/i18n/lang'
+import { normalizePath } from '@/utils/path'
 
 /**
  * Get path to a specific tag page with language support
@@ -9,11 +11,8 @@ import { getLangFromPath, getNextGlobalLang } from '@/i18n/lang'
  * @returns Path to tag page
  */
 export function getTagPath(tagName: string, lang: string): string {
-  const tagPath = lang === defaultLocale
-    ? `/tags/${tagName}/`
-    : `/${lang}/tags/${tagName}/`
-
-  return base ? `${base}${tagPath}` : tagPath
+  // this api already takes base into account
+  return getRelativeLocaleUrl(lang, `tags/${tagName}`)
 }
 
 /**
@@ -24,30 +23,7 @@ export function getTagPath(tagName: string, lang: string): string {
  * @returns Path to post page
  */
 export function getPostPath(slug: string, lang: string): string {
-  const postPath = lang === defaultLocale
-    ? `/posts/${slug}/`
-    : `/${lang}/posts/${slug}/`
-
-  return base ? `${base}${postPath}` : postPath
-}
-
-/**
- * Generate localized path based on current language
- *
- * @param path Path to localize
- * @param currentLang Current language code
- * @returns Localized path with language prefix
- */
-export function getLocalizedPath(path: string, currentLang?: string) {
-  const normalizedPath = path.replace(/^\/|\/$/g, '')
-  const lang = currentLang ?? getLangFromPath(path)
-
-  const langPrefix = lang === defaultLocale ? '' : `/${lang}`
-  const localizedPath = normalizedPath === ''
-    ? `${langPrefix}/`
-    : `${langPrefix}/${normalizedPath}/`
-
-  return base ? `${base}${localizedPath}` : localizedPath
+  return getRelativeLocaleUrl(lang, `posts/${slug}`)
 }
 
 /**
@@ -59,15 +35,15 @@ export function getLocalizedPath(path: string, currentLang?: string) {
  * @returns Path for next language
  */
 export function getNextLangPath(currentPath: string, currentLang: string, nextLang: string): string {
-  const pathWithoutBase = base && currentPath.startsWith(base)
-    ? currentPath.slice(base.length)
-    : currentPath
+  const normalizedPath = normalizePath(currentPath)
+  const pathWithCurrentLang = normalizePath(getRelativeLocaleUrl(currentLang, ''))
 
-  const pagePath = currentLang === defaultLocale
-    ? pathWithoutBase
-    : pathWithoutBase.replace(`/${currentLang}`, '')
+  if (!normalizedPath.startsWith(pathWithCurrentLang)) {
+    throw new Error(`The given path "${currentPath}" doesn't mathch the lang "${currentLang}".`)
+  }
 
-  return getLocalizedPath(pagePath, nextLang)
+  const pagePath = normalizedPath.substring(pathWithCurrentLang.length)
+  return getRelativeLocaleUrl(nextLang, pagePath)
 }
 
 /**

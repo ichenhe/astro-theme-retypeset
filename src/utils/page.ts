@@ -1,22 +1,19 @@
-import { base, moreLocales } from '@/config'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import { allLocales } from '@/config'
 import { getLangFromPath } from '@/i18n/lang'
-import { getLocalizedPath } from '@/i18n/path'
+import { normalizePath } from './path'
 
 // Checks if normalized path matches a specific page type
 function isPageType(path: string, prefix: string = '') {
-  const pathWithoutBase = base && path.startsWith(base)
-    ? path.slice(base.length)
-    : path
+  // include base for convenience since `getRelativeLocaleUrl` does have it
+  const pathWithBase = normalizePath(path, { includeBase: true })
 
-  // Removes leading and trailing slashes from the path
-  const normalizedPath = pathWithoutBase.replace(/^\/|\/$/g, '')
-
+  // any url can start with empty prefix, so check them separately
   if (prefix === '') {
-    return normalizedPath === '' || moreLocales.includes(normalizedPath)
+    return allLocales.some(lang => pathWithBase === getRelativeLocaleUrl(lang, prefix))
   }
 
-  return normalizedPath.startsWith(prefix)
-    || moreLocales.some(lang => normalizedPath.startsWith(`${lang}/${prefix}`))
+  return allLocales.some(lang => pathWithBase.startsWith(getRelativeLocaleUrl(lang, prefix)))
 }
 
 export function isHomePage(path: string) {
@@ -50,6 +47,6 @@ export function getPageInfo(path: string) {
     isTag,
     isAbout,
     getLocalizedPath: (targetPath: string) =>
-      getLocalizedPath(targetPath, currentLang),
+      getRelativeLocaleUrl(currentLang, targetPath),
   }
 }

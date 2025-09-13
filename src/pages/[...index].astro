@@ -1,8 +1,10 @@
 ---
+import { getRelativeLocaleUrl } from 'astro:i18n'
 import PostList from '@/components/PostList.astro'
-import { defaultLocale, moreLocales } from '@/config'
+import { allLocales } from '@/config'
 import Layout from '@/layouts/Layout.astro'
 import { getPinnedPosts, getPostsByYear } from '@/utils/content'
+import { normalizePath } from '@/utils/path'
 
 export async function getStaticPaths() {
   type PathItem = {
@@ -12,16 +14,10 @@ export async function getStaticPaths() {
 
   const paths: PathItem[] = []
 
-  // Default locale
-  paths.push({
-    params: { index: undefined },
-    props: { lang: defaultLocale },
-  })
-
   // More locales
-  moreLocales.forEach((lang: string) => {
+  allLocales.forEach((lang: string) => {
     paths.push({
-      params: { index: `${lang}/` },
+      params: { index: normalizePath(getRelativeLocaleUrl(lang)) },
       props: { lang },
     })
   })

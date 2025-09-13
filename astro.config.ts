@@ -35,11 +35,11 @@ export default defineConfig({
   },
   ...imageConfig,
   i18n: {
-    locales: Object.entries(langMap).map(([path, codes]) => ({
-      path,
-      codes: codes as [string, ...string[]],
-    })),
+    locales: Object.entries(langMap).map(([path]) => path),
     defaultLocale,
+    routing: {
+      prefixDefaultLocale: themeConfig.global.prefixDefaultLocale,
+    },
   },
   integrations: [
     UnoCSS({

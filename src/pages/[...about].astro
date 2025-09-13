@@ -1,7 +1,9 @@
 ---
 import { getCollection, render } from 'astro:content'
-import { defaultLocale, moreLocales } from '@/config'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import { allLocales } from '@/config'
 import Layout from '@/layouts/Layout.astro'
+import { normalizePath } from '@/utils/path'
 
 export async function getStaticPaths() {
   type PathItem = {
@@ -9,23 +11,10 @@ export async function getStaticPaths() {
     props: { lang: string }
   }
 
-  const paths: PathItem[] = []
-
-  // Default locale
-  paths.push({
-    params: { about: 'about/' },
-    props: { lang: defaultLocale },
-  })
-
-  // More locales
-  moreLocales.forEach((lang: string) => {
-    paths.push({
-      params: { about: `${lang}/about/` },
-      props: { lang },
-    })
-  })
-
-  return paths
+  return allLocales.map((lang: string): PathItem => ({
+    params: { about: normalizePath(getRelativeLocaleUrl(lang, 'about')) },
+    props: { lang },
+  }))
 }
 
 const { lang } = Astro.props
