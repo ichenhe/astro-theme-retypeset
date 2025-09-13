@@ -10,7 +10,7 @@ import remarkDirective from 'remark-directive'
 import remarkMath from 'remark-math'
 import UnoCSS from 'unocss/astro'
 import { base, defaultLocale, themeConfig } from './src/config'
-import { langMap } from './src/i18n/config'
+import { typedLangMap } from './src/i18n/config'
 import { rehypeCodeCopyButton } from './src/plugins/rehype-code-copy-button.mjs'
 import { rehypeExternalLinks } from './src/plugins/rehype-external-links.mjs'
 import { rehypeHeadingAnchor } from './src/plugins/rehype-heading-anchor.mjs'
@@ -35,7 +35,7 @@ export default defineConfig({
   },
   ...imageConfig,
   i18n: {
-    locales: Object.entries(langMap).map(([path]) => path),
+    locales: Object.keys(typedLangMap) as (keyof typeof typedLangMap)[],
     defaultLocale,
     routing: {
       prefixDefaultLocale: themeConfig.global.prefixDefaultLocale,

@@ -1,4 +1,4 @@
-import type { supportedLangs } from '@/i18n/config'
+import type { supportedLangs, typedLangMap } from '@/i18n/config'
 
 type Exclude<T, U> = T extends U ? never : T
 
@@ -29,7 +29,7 @@ export interface ThemeConfig {
     }
   }
   global: {
-    locale: typeof supportedLangs[number]
+    locale: keyof typeof typedLangMap
     moreLocales: typeof supportedLangs[number][]
     prefixDefaultLocale?: boolean
     fontStyle: 'sans' | 'serif'
