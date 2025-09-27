@@ -1,4 +1,6 @@
-export const ui = {
+import { defaultLocale } from '@/config'
+
+const ui = {
   'de': {
     title: 'Neusatz',
     subtitle: 'Die Schönheit der Typografie wiederbeleben',
@@ -98,4 +100,13 @@ export const ui = {
     about: '關於',
     toc: '目錄',
   },
+}
+
+export function getUI(lang?: string) {
+  let actualLang = lang ?? defaultLocale
+  if (lang && !Object.keys(ui).includes(lang)) {
+    console.warn(`Requested lang ${lang} is not available in ui, fallback to default`)
+    actualLang = defaultLocale
+  }
+  return ui[actualLang as keyof typeof ui]
 }

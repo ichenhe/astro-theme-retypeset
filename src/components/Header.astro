@@ -1,12 +1,13 @@
 ---
-import themeConfig from '@/config'
-import { ui } from '@/i18n/ui'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import themeConfig, { defaultLocale } from '@/config'
+import { getUI } from '@/i18n/ui'
 import { getPageInfo } from '@/utils/page'
 
-const { currentLang, getLocalizedPath, isPost } = getPageInfo(Astro.url.pathname)
+const { currentLang, isPost } = getPageInfo(Astro.url.pathname)
 const { title, subtitle, i18nTitle } = themeConfig.site
 
-const currentUI = ui[currentLang as keyof typeof ui] ?? {}
+const currentUI = getUI(currentLang)
 const headerTitle = i18nTitle ? currentUI.title : title
 const headerSubtitle = i18nTitle ? currentUI.subtitle : subtitle
 
@@ -38,7 +39,7 @@ const SubtitleTag = isPost ? 'div' : 'h2'
     >
       <a
         id="site-title-link"
-        href={getLocalizedPath('/')}
+        href={getRelativeLocaleUrl(currentLang ?? defaultLocale, '/')}
       >
           {headerTitle}
       </a>

@@ -1,9 +1,11 @@
 ---
-import { ui } from '@/i18n/ui'
+import { getRelativeLocaleUrl } from 'astro:i18n'
+import { defaultLocale } from '@/config'
+import { getUI } from '@/i18n/ui'
 import { getPageInfo } from '@/utils/page'
 
-const { currentLang, isHome, isPost, isTag, isAbout, getLocalizedPath } = getPageInfo(Astro.url.pathname)
-const currentUI = ui[currentLang as keyof typeof ui] ?? {}
+const { currentLang, isHome, isPost, isTag, isAbout } = getPageInfo(Astro.url.pathname)
+const currentUI = getUI(currentLang)
 
 const isPostActive = isHome || isPost
 const isTagActive = isTag
@@ -46,7 +48,7 @@ const navItems = [
     {navItems.map(item => (
       <li>
         <a
-          href={getLocalizedPath(item.href)}
+          href={getRelativeLocaleUrl(currentLang ?? defaultLocale, item.href)}
           class={item.className}
         >
           {item.label}

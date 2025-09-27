@@ -1,7 +1,7 @@
 ---
 import type { MarkdownHeading } from 'astro'
 import TocIcon from '@/assets/icons/toc-icon.svg'
-import { ui } from '@/i18n/ui'
+import { getUI } from '@/i18n/ui'
 import { getPageInfo } from '@/utils/page'
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { currentLang } = getPageInfo(Astro.url.pathname)
-const currentUI = ui[currentLang as keyof typeof ui] ?? {}
+const currentUI = getUI(currentLang)
 
 const { headings = [] } = Astro.props
 const filteredHeadings = headings.filter(heading =>

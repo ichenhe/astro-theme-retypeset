@@ -1,6 +1,6 @@
 import { getRelativeLocaleUrl } from 'astro:i18n'
-import { defaultLocale, moreLocales } from '@/config'
-import { getLangFromPath, getNextGlobalLang } from '@/i18n/lang'
+import { allLocales, defaultLocale, moreLocales } from '@/config'
+import { getLangFromPath } from '@/i18n/lang'
 import { normalizePath } from '@/utils/path'
 
 /**
@@ -33,8 +33,9 @@ export function getPostPath(slug: string, lang: string): string {
  * @param currentLang Current language code
  * @param nextLang Next language code to switch to
  * @returns Path for next language
+ * @throws {Error} The given path doesn't match the current lang.
  */
-export function getNextLangPath(currentPath: string, currentLang: string, nextLang: string): string {
+export function getAlternativeLangPath(currentPath: string, currentLang: string, nextLang: string): string {
   const normalizedPath = normalizePath(currentPath)
   const pathWithCurrentLang = normalizePath(getRelativeLocaleUrl(currentLang, ''))
 
@@ -47,41 +48,34 @@ export function getNextLangPath(currentPath: string, currentLang: string, nextLa
 }
 
 /**
- * Get next language path from global language list
+ * Get next language path from supported language list. If the current lang is
+ * not in the list, the first available lang will be selected.
  *
- * @param currentPath Current page path
+ * @param currentPath Current localized page path.
+ * @param supportedLangs List of supported language codes, defaults to all.
  * @returns Path for next supported language
+ * @throws {Error} The given path is not localized.
  */
-export function getNextGlobalLangPath(currentPath: string): string {
+export function getNextLangPath(currentPath: string, supportedLangs?: string[]): string {
   const currentLang = getLangFromPath(currentPath)
-  const nextLang = getNextGlobalLang(currentLang)
-  return getNextLangPath(currentPath, currentLang, nextLang)
-}
-
-/**
- * Get next language path from supported language list
- *
- * @param currentPath Current page path
- * @param supportedLangs List of supported language codes
- * @returns Path for next supported language
- */
-export function getNextSupportedLangPath(currentPath: string, supportedLangs: string[]): string {
-  if (supportedLangs.length === 0) {
-    return getNextGlobalLangPath(currentPath)
+  if (!currentLang) {
+    // We won't apply default lange subjectively here,
+    // because in the case where prefixDefaultLocale=true, pages can be "unlocalized",
+    // adding lang code to the path will result in 404 or unexpected page.
+    // Prefering throwing error to expose the probelm in the early stage.
+    throw new Error(`The given path "${currentPath}" is not localized.`)
   }
-
-  // Sort supported languages by global priority
   const langPriority = new Map(
     [defaultLocale, ...moreLocales].map((lang, index) => [lang, index]),
   )
-  const sortedLangs = [...supportedLangs].sort(
+  const candidates = (supportedLangs ?? allLocales).sort(
     (a, b) => (langPriority.get(a) ?? 0) - (langPriority.get(b) ?? 0),
   )
+  if (candidates.length === 0) {
+    throw new Error(`No available languages, did you pass an empty supportedLangs?`)
+  }
 
-  // Get current language and next in cycle
-  const currentLang = getLangFromPath(currentPath)
-  const currentIndex = sortedLangs.indexOf(currentLang)
-  const nextLang = sortedLangs[(currentIndex + 1) % sortedLangs.length]
-
-  return getNextLangPath(currentPath, currentLang, nextLang)
+  const currentIndex = candidates.indexOf(currentLang)
+  const nextLang = candidates[(currentIndex + 1) % candidates.length]
+  return getAlternativeLangPath(currentPath, currentLang, nextLang)
 }

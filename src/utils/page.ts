@@ -46,7 +46,5 @@ export function getPageInfo(path: string) {
     isPost,
     isTag,
     isAbout,
-    getLocalizedPath: (targetPath: string) =>
-      getRelativeLocaleUrl(currentLang, targetPath),
   }
 }

@@ -7,7 +7,7 @@ import MarkdownIt from 'markdown-it'
 import { parse } from 'node-html-parser'
 import sanitizeHtml from 'sanitize-html'
 import { base, defaultLocale, themeConfig } from '@/config'
-import { ui } from '@/i18n/ui'
+import { getUI } from '@/i18n/ui'
 import { memoize } from '@/utils/cache'
 import { getPostDescription } from '@/utils/description'
 
@@ -109,7 +109,7 @@ async function fixRelativeImagePaths(htmlContent: string, baseUrl: string): Prom
  * @returns A Feed instance ready for RSS or Atom output
  */
 export async function generateFeed({ lang }: { lang?: string } = {}) {
-  const currentUI = ui[lang as keyof typeof ui] ?? ui[defaultLocale as keyof typeof ui] ?? {}
+  const currentUI = getUI(lang)
   const siteURL = lang ? `${url}${base}/${lang}/` : `${url}${base}/`
 
   // Create Feed instance
